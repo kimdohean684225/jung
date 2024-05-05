@@ -14,6 +14,7 @@ let moveSpeed = 2; // 이동 속도
 let randomX = Math.random() * canvasWidth;
 let randomY = Math.random() * canvasHeight;
 
+let keys = {};
 
 document.addEventListener('DOMContentLoaded', function() {
     const titleScreen = document.querySelector('.title-screen');
@@ -29,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     });
 });
-
 
 function drawHeart(x, y, size, rotation, fillColor, strokeColor) {
     ctx.save();
@@ -105,7 +105,7 @@ function render() {
     ctx.restore();
 }
 
-const keys = {};
+keys = {};
 document.addEventListener('keydown', function(event) {
     keys[event.code] = true;
 });
@@ -120,19 +120,41 @@ function gameLoop() {
     
     requestAnimationFrame(gameLoop);
 }
-document.addEventListener('DOMContentLoaded', function() {
-    const titleScreen = document.querySelector('.title-screen');
-    const startButton = document.getElementById('startButton');
-    canvas = document.getElementById('myCanvas');
-    ctx = canvas.getContext('2d');
 
-    startButton.addEventListener('click', function() {
-        titleScreen.style.display = 'none';
-        canvas.style.display = 'block';
+// 적 그리기 함수 추가
+function drawEnemy(enemy) {
+    ctx.fillStyle = enemy.color;
+    ctx.beginPath();
+    ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+    ctx.fill();
+}
 
-        initializeGame();
-    });
-});
+// 게임 시작 시 적 초기화 함수 추가
+function initializeEnemies() {
+    const ENEMY_MIN_SPEED = 1;
+    const ENEMY_MAX_SPEED = 3;
+    const ENEMY_MIN_SIZE = 10;
+    const ENEMY_MAX_SIZE = 20;
+    const ENEMY_MIN_COUNT = 5;
+    const ENEMY_MAX_COUNT = 15;
+
+    for (let i = 0; i < Math.floor(Math.random() * (ENEMY_MAX_COUNT - ENEMY_MIN_COUNT)) + ENEMY_MIN_COUNT; i++) {
+        let x, y;
+        if (Math.random() < 0.5) {
+            x = Math.random() < 0.5 ? -20 : canvasWidth - 20; // 캔버스의 왼쪽이나 오른쪽에 생성되도록 수정
+            y = Math.random() * canvasHeight;
+        } else {
+            x = Math.random() * canvasWidth;
+            y = Math.random() < 0.5 ? -20 : canvasHeight - 20; // 캔버스의 위쪽이나 아래쪽에 생성되도록 수정
+        }
+        
+        const speed = Math.random() * (ENEMY_MAX_SPEED - ENEMY_MIN_SPEED) + ENEMY_MIN_SPEED;
+        const size = Math.random() * (ENEMY_MAX_SIZE - ENEMY_MIN_SIZE) + ENEMY_MIN_SIZE;
+        const color = '#' + Math.floor(Math.random()*16777215).toString(16); // 랜덤 색상 생성
+
+        drawEnemy({ x, y, speed, size, color });
+    }
+}
 
 function initializeGame() {
     canvas.addEventListener('keydown', function(event) {
@@ -155,10 +177,16 @@ function initializeGame() {
 
     keys = {};
 
+    // 요청한 부분 추가
+    initializeEnemies();
+    // 요청한 부분 추가 끝
+
+    // 새로고침할 때 별의 위치를 랜덤으로 업데이트
+    randomX = Math.random() * canvasWidth;
+    randomY = Math.random() * canvasHeight;
+
     gameLoop();
 }
-// 새로고침할 때 별의 위치를 랜덤으로 업데이트
-randomX = Math.random() * canvasWidth;
-randomY = Math.random() * canvasHeight;
 
-gameLoop();
+// 게임 시작
+initializeGame();
